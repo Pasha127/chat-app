@@ -5,7 +5,7 @@ import { hostOnly, JWTAuth } from "../../lib/auth/middleware.js";
 import { createTokens, refreshTokens } from "../../lib/tools/tokenTools.js";
 import { checkUserSchema, checkValidationResult as checkUserValidationResult } from "../validators/uservalidator.js";
 import userModel from "../models/userModel.js";
-import roomModel from "../models/roomModel.js";
+
 
 const localEndpoint=`${process.env.LOCAL_URL}${process.env.PORT}`
 

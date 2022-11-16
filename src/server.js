@@ -12,7 +12,7 @@ import {newConnectionHandler} from "./socket/index.js"
 /* import googleStrategy from "./authentication/googleAuth.js"; */
 
 const server = express();
-const httpServer = createServer(expressServer);
+const httpServer = createServer(server);
 const io = new SocketServer(httpServer);
 io.on("connection", newConnectionHandler);
 
@@ -32,7 +32,7 @@ mongoose.connect(process.env.MONGO_CONNECTION_URL)
 mongoose.connection.on("connected", ()=> 
 httpServer.listen(
     port,()=>{
-    console.table(listEndpoints(expressServer));
+    console.table(listEndpoints(server));
     console.log(`Server running on posrt ${port}`)
 }))
 
