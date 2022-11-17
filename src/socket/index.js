@@ -8,7 +8,7 @@ export const newConnectionHandler = newClient => {
         newClient.broadcast.emit("listUpdate", onlineUsers)
     })
     newClient.on("sendMessage", message => {
-        newClient.emit("newMessage",message)
+/*         newClient.emit("newMessage",message) */
         newClient.broadcast.emit("newMessage",message)
     })
     newClient.on("disconnect", ()=>{
