@@ -3,7 +3,7 @@ import q2m from "query-to-mongo";
 import createHttpError from "http-errors";
 import { hostOnly, JWTAuth } from "../../lib/auth/middleware.js";
 import { createTokens, refreshTokens } from "../../lib/tools/tokenTools.js";
-import { checkUserSchema, checkValidationResult as checkUserValidationResult } from "../validators/uservalidator.js";
+import { checkUserSchema, checkValidationResult as checkUserValidationResult } from "../validators/userValidator.js";
 import userModel from "../models/userModel.js";
 
 
