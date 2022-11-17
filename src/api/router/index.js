@@ -7,7 +7,7 @@ import { checkUserSchema, checkValidationResult as checkUserValidationResult } f
 import userModel from "../models/userModel.js";
 
 
-const localEndpoint=`${process.env.LOCAL_URL}${process.env.PORT}`
+const localEndpoint=process.env.BE_PROD_URL
 
 const router = express.Router();
 
