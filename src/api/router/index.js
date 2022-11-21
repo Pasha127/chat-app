@@ -9,6 +9,7 @@ import {
 } from "../validators/userValidator.js";
 import userModel from "../models/userModel.js";
 import chatModel from "../models/chatModel.js";
+import MessageModel from "../models/MessageModel.js";
 
 const localEndpoint = process.env.BE_PROD_URL;
 
@@ -208,43 +209,54 @@ router.get("/user/:userId", JWTAuth, async (req, res, next) => {
 
 //------------------------------------ chats ---------------------------
 
-router.post("/chat", JWTAuth, async (req, res, next) => {
-  try {
-    const newChat = await chatModel(req.body);
-    const { _id } = newChat.save();
-    if (_id) {
-      res.status(201).send(_id);
-    } else {
-      next(createHttpError(404, `the chat did not create`));
+router.post(
+  "/chat",
+  /* JWTAuth, */ async (req, res, next) => {
+    try {
+      const newChat = await chatModel(req.body);
+      const { _id } = await newChat.save();
+      console.log(newChat);
+      if (_id) {
+        res.status(201).send(_id);
+      } else {
+        next(createHttpError(404, `the chat did not create`));
+      }
+    } catch (error) {
+      next(error);
     }
-  } catch (error) {
-    next(error);
   }
-});
+);
 
-router.get("/chat", JWTAuth, async (req, res, next) => {
-  try {
-    const chats = await chatModel.find({ members: req.user._id });
-    if (chats) {
-      res.send(chats);
+router.get(
+  "/chat/:chatId",
+  /* JWTAuth, */ async (req, res, next) => {
+    const chat = await chatModel.findById(req.params.chatId);
+    console.log("this is chat", chat);
+    if (chat) {
+      res.send(chat);
     } else {
-      next(
-        createHttpError(404, `the chats you are searching for, do not found`)
-      );
+      next(createHttpError(404, `the chat you searching for, not found`));
     }
-  } catch (error) {
-    next(error);
   }
-});
+);
 
-router.get("chat/:chatId", JWTAuth, async (req, res, next) => {
-  const chat = await chatModel.findById(req.params.chatId);
-  if (chat) {
-    res.send(chat);
-  } else {
-    next(createHttpError(404, `the chat you searching for, not found`));
+router.get(
+  "/chat",
+  /* JWTAuth, */ async (req, res, next) => {
+    try {
+      const chats = await chatModel.find({ members: req.user._id });
+      if (chats) {
+        res.send(chats);
+      } else {
+        next(
+          createHttpError(404, `the chats you are searching for, do not found`)
+        );
+      }
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 /* router.put("chat/:chatId", JWTAuth, async (req, res, next) => {
   const updatedChat = await chatModel.findByIdAndUpdate(
@@ -269,5 +281,53 @@ router.get("chat/:chatId", JWTAuth, async (req, res, next) => {
     next(error);
   }
 }); */
+
+// ------------------- message endpoints -----------------------------
+
+router.post("/message", async (req, res, next) => {
+  try {
+    const newMessage = await MessageModel(req.body);
+    const { _id } = await newMessage.save();
+    if (_id) {
+      res.send(_id);
+    } else {
+      next(createHttpError(404, `message could not create`));
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get(
+  "/message",
+  /* JWTAuth, */ async (req, res, next) => {
+    try {
+      const messages = await MessageModel.find();
+      if (messages) {
+        res.status(200).send(messages);
+      } else {
+        next(createHttpError(404, `messages do not found`));
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get(
+  "/message/:messageId",
+  /* JWTAuth, */ async (req, res, next) => {
+    try {
+      const message = await MessageModel.findById(req.params.messageId);
+      if (message) {
+        res.send(message);
+      } else {
+        next(createHttpError(404, `the message you searching for, not found`));
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 export default router;
