@@ -1,7 +1,6 @@
 import MessageModel from "../api/models/MessageModel.js";
 
-let onlineUsers = [];
-
+let onlineUsers = []; 
 export const newConnectionHandler = (newClient) => {
   newClient.emit("welcome", {
     message: `Connection established on pipeline: ${newClient.id}`,
