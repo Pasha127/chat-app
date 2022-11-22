@@ -6,26 +6,30 @@ export const JWTAuth = async (req, res, next) => {
       next(createHttpError(401, "No access token in cookies."))
   } else {
     try {
-      const accessToken = req.cookies.accessToken
-      const payload = await verifyAccessToken(accessToken)
+      const currentAccessToken = req.cookies.accessToken
+      const payload = await verifyAccessToken(currentAccessToken)
       if(payload.result !== "fail"){
+        console.log("passingToken")
       req.user = {
         _id: payload._id,
-        role: payload.role,
+        username: payload.username,
       }
       next()
       }else{
-        const {newAccessToken, newRefreshToken, user} = refreshTokens(req.cookies.refreshToken)
+        console.log("failedToken",req.cookies.refreshToken)
+        const  {accessToken, refreshToken, user} = await refreshTokens(req.cookies.refreshToken)
+        console.log("refreshed", refreshToken, user)
       req.user = {
         _id: user._id,
-        role: user.role,
+        username: user.username,
       };
       req.newTokens={
-        newAccessToken,
-        newRefreshToken
+        accessToken,
+        refreshToken
       };
       next()}
-    } catch (error) {      
+    } catch (error) {
+      console.log(error);      
       next(createHttpError(401, "Token invalid!"))
     }
   }

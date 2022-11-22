@@ -4,7 +4,7 @@ import userModel from "../../api/models/userModel.js";
 
 
 export const createTokens = async user => {
-  const accessToken = await createAccessToken({ _id: user._id, role: user.role });
+  const accessToken = await createAccessToken({ _id: user._id, username: user.username });
   const refreshToken = await createRefreshToken({ _id: user._id });
  
   user.refreshToken = refreshToken;
@@ -56,7 +56,7 @@ export const refreshTokens = async currentRefreshToken => {
     if (!user) throw new createHttpError(404, `User with id ${refreshTokenPayload._id} not found!`);
     if (user.refreshToken && user.refreshToken === currentRefreshToken) {
       const { accessToken, refreshToken } = await createTokens(user)
-      return { accessToken, refreshToken, user }
+      return { accessToken, refreshToken, user:user.toObject() }
     } else {
       throw new createHttpError(401, "Refresh token invalid!")
     }

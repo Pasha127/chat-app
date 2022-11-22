@@ -20,22 +20,22 @@ const router = express.Router();
 router.post("/user/register", async (req, res, next) => {
     try {
         console.log(req.headers.origin, "POST user at:", new Date());        
-        const existingUser = await userModel.find({ email: req.body.email });
+        const existingUser = await userModel.find({ $or : [{email: req.body.email}, {username:req.body.username} ] });
     console.log("this is existing user", existingUser);
     if (existingUser.length > 0) {
-      next(createHttpError(400, `Email already in use`));
-    }
+      next(createHttpError(400, `Email or username already in use`));
+    }else{
         const newUser = new userModel(req.body);
     const { _id } = await newUser.save();
         if (_id) {
             const { accessToken, refreshToken } = await createTokens(newUser);
-            res.cookie("accessToken", accessToken);
-            res.cookie("refreshToken", refreshToken);
+            res.cookie("accessToken", accessToken, {httpOnly:true});
+            res.cookie("refreshToken", refreshToken, {httpOnly:true});
             res.status(201).send(newUser);
           } else {
             console.log("Error in returned registration");
             next(createHttpError(500, `Registration error`));
-        }
+        }}
   } catch (error) {
         console.log("Error in registration", error);
         next(error);
@@ -48,8 +48,8 @@ router.put("/user/login", async (req, res, next) => {
       const user = await userModel.checkCredentials(email, password);  
       if (user) {
         const { accessToken, refreshToken } = await createTokens(user);
-        res.cookie("accessToken", accessToken);
-        res.cookie("refreshToken", refreshToken);
+        res.cookie("accessToken", accessToken, {httpOnly:true});
+        res.cookie("refreshToken", refreshToken, {httpOnly:true});
         res.status(200).send(user);
       } else {
       next(
@@ -68,9 +68,9 @@ router.post("/user/refreshTokens", async (req, res, next) => {
     const { accessToken, refreshToken, user } = await refreshTokens(
       currentRefreshToken
     );
-      res.cookie("accessToken", accessToken);
-      res.cookie("refreshToken", refreshToken);
-    res.status(201).send({ message: `${user.name}refreshed tokens` });
+      res.cookie("accessToken", accessToken, {httpOnly:true});
+      res.cookie("refreshToken", refreshToken, {httpOnly:true});
+    res.status(201).send({ message: `${user.username} refreshed tokens` });
     } catch (error) {
       console.log("Refresh tokens", error);
       next(error);
@@ -79,8 +79,8 @@ router.post("/user/refreshTokens", async (req, res, next) => {
 
 router.get("/user/all", JWTAuth, async (req, res, next) => {
   if (req.newTokens) {
-    res.cookie("accessToken", req.newTokens.newAccessToken);
-    res.cookie("refreshToken", req.newTokens.newRefreshToken);
+    res.cookie("accessToken", req.newTokens.newAccessToken, {httpOnly:true});
+    res.cookie("refreshToken", req.newTokens.newRefreshToken, {httpOnly:true});
   }
   try {
     console.log(req.headers.origin, "GET all users at:", new Date());
@@ -102,7 +102,7 @@ router.put("/user/logout", JWTAuth, async (req, res, next) => {
       res.clearCookie("refreshToken");
       res.clearCookie("accessToken");
       /*  res.redirect(`${process.env.FE_DEV_URL}/`) */
-      res.send(200);
+      res.status(200).send({ message: `${user.toObject().username} logged out` });
     } else {
       next(createHttpError(404, "User not found"));
     }
@@ -114,8 +114,8 @@ router.put("/user/logout", JWTAuth, async (req, res, next) => {
 
 router.get("/user/me", JWTAuth, async (req, res, next) => {
   if (req.newTokens) {
-    res.cookie("accessToken", req.newTokens.newAccessToken);
-    res.cookie("refreshToken", req.newTokens.newRefreshToken);
+    res.cookie("accessToken", req.newTokens.newAccessToken, {httpOnly:true});
+    res.cookie("refreshToken", req.newTokens.newRefreshToken, {httpOnly:true});
   }
   try {
     console.log(req.headers.origin, "GET me at:", new Date());
@@ -136,8 +136,8 @@ router.get("/user/me", JWTAuth, async (req, res, next) => {
 
 router.put("/user/me", JWTAuth, async (req, res, next) => {
   if (req.newTokens) {
-    res.cookie("accessToken", req.newTokens.newAccessToken);
-    res.cookie("refreshToken", req.newTokens.newRefreshToken);
+    res.cookie("accessToken", req.newTokens.newAccessToken, {httpOnly:true});
+    res.cookie("refreshToken", req.newTokens.newRefreshToken, {httpOnly:true});
   }
   try {
     console.log(req.headers.origin, "PUT User at:", new Date());
@@ -192,8 +192,8 @@ router.post(
 
 router.get("/user/:userId", JWTAuth, async (req, res, next) => {
   if (req.newTokens) {
-    res.cookie("accessToken", req.newTokens.newAccessToken);
-    res.cookie("refreshToken", req.newTokens.newRefreshToken);
+    res.cookie("accessToken", req.newTokens.newAccessToken, {httpOnly:true});
+    res.cookie("refreshToken", req.newTokens.newRefreshToken, {httpOnly:true});
   }
   try {
     console.log(req.headers.origin, "GET user at:", new Date());
