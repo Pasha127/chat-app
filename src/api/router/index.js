@@ -233,7 +233,7 @@ router.get(
     const chat = await chatModel.findById(req.params.chatId);
     console.log("this is chat", chat);
     if (chat) {
-      res.send(chat);
+      res.status(200).send(chat);
     } else {
       next(createHttpError(404, `the chat you searching for, not found`));
     }

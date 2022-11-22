@@ -8,6 +8,7 @@ export const newConnectionHandler = newClient => {
         newClient.broadcast.emit("listUpdate", onlineUsers)
     })
     newClient.on("sendMessage", message => {
+        //save message to db
         newClient.emit("newMessage",message)
         newClient.broadcast.emit("newMessage",message)
     })
