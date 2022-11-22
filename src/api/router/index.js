@@ -18,62 +18,58 @@ const router = express.Router();
 ////////////////////////////  USERS  ////////////////////////////
 
 router.post("/user/register", async (req, res, next) => {
-  try {
-    console.log(req.headers.origin, "POST user at:", new Date());
-    const newUser = new userModel(req.body);
-    const { email, role, rooms } = newUser;
-    const { _id } = await newUser.save();
-    if (_id) {
-      const { accessToken, refreshToken } = await createTokens(newUser);
-      res.cookie("accessToken", accessToken);
-      res.cookie("refreshToken", refreshToken);
-      res.status(201).send({ email, role, rooms, _id });
-    } else {
-      console.log("Error in returned registration");
-      next(createHttpError(500, `Registration error`));
-    }
-  } catch (error) {
-    console.log("Error in registration", error);
-    next(error);
-  }
-});
+    try {
+        console.log(req.headers.origin, "POST user at:", new Date());        
+        const existingUser = await userModel.find(req.body.email);
+        if(existingUser){ next(createHttpError(400, `Email already in use`));}
+        const newUser = new userModel(req.body);
+        const{_id}= await newUser.save();
+        if (_id) {
+            const { accessToken, refreshToken } = await createTokens(newUser);
+            res.cookie("accessToken", accessToken);
+            res.cookie("refreshToken", refreshToken);
+            res.status(201).send(newUser);
+          } else {
+            console.log("Error in returned registration");
+            next(createHttpError(500, `Registration error`));
+        }
+    }catch(error){
+        console.log("Error in registration", error);
+        next(error);
+    }   
+  })
 
 router.put("/user/login", async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
-    const user = await userModel.checkCredentials(email, password);
-    if (user) {
-      const { accessToken, refreshToken } = await createTokens(user);
+    try {
+      const { email, password } = req.body;
+      const user = await userModel.checkCredentials(email, password);  
+      if (user) {
+        const { accessToken, refreshToken } = await createTokens(user);
+        res.cookie("accessToken", accessToken);
+        res.cookie("refreshToken", refreshToken);
+        res.status(200).send(user);
+      } else {
+        next(createHttpError(401, `Credentials did not match or user not found.`));
+      }
+    } catch (error) {
+        console.log("Error in log in");
+      next(error);
+    }
+  })
+
+  
+router.post("/user/refreshTokens", async (req, res, next) => {
+    try {
+      const  currentRefreshToken  = req.cookies.refreshToken;
+      const { accessToken, refreshToken, user } = await refreshTokens(currentRefreshToken);
       res.cookie("accessToken", accessToken);
       res.cookie("refreshToken", refreshToken);
-      res.status(200).send(user);
-      /*         res.redirect(`${process.env.FE_DEV_URL}/`) */
-    } else {
-      res.redirect(`${process.env.FE_DEV_URL}/`);
-      next(
-        createHttpError(401, `Credentials did not match or user not found.`)
-      );
+      res.status(201).send({message: `${user.name}refreshed tokens`});
+    } catch (error) {
+      console.log("Refresh tokens", error);
+      next(error);
     }
-  } catch (error) {
-    console.log("Error in log in");
-    next(error);
-  }
-});
-
-router.post("/user/refreshTokens", async (req, res, next) => {
-  try {
-    const currentRefreshToken = req.cookies.refreshToken;
-    const { accessToken, refreshToken } = await refreshTokens(
-      currentRefreshToken
-    );
-    res.cookie("accessToken", accessToken);
-    res.cookie("refreshToken", refreshToken);
-    res.status(201).send({ message: "refreshed tokens" });
-  } catch (error) {
-    console.log("Refresh tokens", error);
-    next(error);
-  }
-});
+  })
 
 router.get("/user/all", JWTAuth, async (req, res, next) => {
   if (req.newTokens) {

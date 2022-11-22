@@ -62,7 +62,7 @@ console.log("redirectedFB")
  */
 
 /* 
-router.put("user/edit/:userId", JWTAuth,adminOnly, async (req,res,next)=>{
+router.put("user/edit/:userId", JWTAuth, async (req,res,next)=>{
   if(req.newTokens){
     res.cookie("accessToken", req.newTokens.newAccessToken)
     res.cookie("refreshToken", req.newTokens.newRefreshToken)}
@@ -78,7 +78,7 @@ router.put("user/edit/:userId", JWTAuth,adminOnly, async (req,res,next)=>{
       }
     }) */
     /* 
-    router.delete("user/delete/:userId", JWTAuth, adminOnly, async (req,res,next)=>{try{
+    router.delete("user/delete/:userId", JWTAuth, async (req,res,next)=>{try{
         console.log(req.headers.origin, "DELETE post at:", new Date());
         const deletedUser =  await userModel.findByIdAndDelete(req.params.userId)      
         if(deletedBlogPost){
