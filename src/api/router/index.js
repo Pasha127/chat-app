@@ -1,7 +1,7 @@
 import express from "express";
 import q2m from "query-to-mongo";
 import createHttpError from "http-errors";
-import { hostOnly, JWTAuth } from "../../lib/auth/middleware.js";
+import { JWTAuth } from "../../lib/auth/middleware.js";
 import { createTokens, refreshTokens } from "../../lib/tools/tokenTools.js";
 import {
   checkUserSchema,
@@ -18,58 +18,64 @@ const router = express.Router();
 ////////////////////////////  USERS  ////////////////////////////
 
 router.post("/user/register", async (req, res, next) => {
-    try {
-        console.log(req.headers.origin, "POST user at:", new Date());        
-        const existingUser = await userModel.find(req.body.email);
-        if(existingUser){ next(createHttpError(400, `Email already in use`));}
-        const newUser = new userModel(req.body);
-        const{_id}= await newUser.save();
-        if (_id) {
-            const { accessToken, refreshToken } = await createTokens(newUser);
-            res.cookie("accessToken", accessToken);
-            res.cookie("refreshToken", refreshToken);
-            res.status(201).send(newUser);
-          } else {
-            console.log("Error in returned registration");
-            next(createHttpError(500, `Registration error`));
-        }
-    }catch(error){
-        console.log("Error in registration", error);
-        next(error);
-    }   
-  })
-
-router.put("/user/login", async (req, res, next) => {
-    try {
-      const { email, password } = req.body;
-      const user = await userModel.checkCredentials(email, password);  
-      if (user) {
-        const { accessToken, refreshToken } = await createTokens(user);
-        res.cookie("accessToken", accessToken);
-        res.cookie("refreshToken", refreshToken);
-        res.status(200).send(user);
-      } else {
-        next(createHttpError(401, `Credentials did not match or user not found.`));
-      }
-    } catch (error) {
-        console.log("Error in log in");
-      next(error);
+  try {
+    console.log(req.headers.origin, "POST user at:", new Date());
+    const existingUser = await userModel.find({ email: req.body.email });
+    console.log(existingUser);
+    if (existingUser) {
+      next(createHttpError(400, `Email already in use`));
     }
-  })
-
-  
-router.post("/user/refreshTokens", async (req, res, next) => {
-    try {
-      const  currentRefreshToken  = req.cookies.refreshToken;
-      const { accessToken, refreshToken, user } = await refreshTokens(currentRefreshToken);
+    const newUser = new userModel(req.body);
+    const { _id } = await newUser.save();
+    if (_id) {
+      const { accessToken, refreshToken } = await createTokens(newUser);
       res.cookie("accessToken", accessToken);
       res.cookie("refreshToken", refreshToken);
-      res.status(201).send({message: `${user.name}refreshed tokens`});
-    } catch (error) {
-      console.log("Refresh tokens", error);
-      next(error);
+      res.status(201).send(newUser);
+    } else {
+      console.log("Error in returned registration");
+      next(createHttpError(500, `Registration error`));
     }
-  })
+  } catch (error) {
+    console.log("Error in registration", error);
+    next(error);
+  }
+});
+
+router.put("/user/login", async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const user = await userModel.checkCredentials(email, password);
+    if (user) {
+      const { accessToken, refreshToken } = await createTokens(user);
+      res.cookie("accessToken", accessToken);
+      res.cookie("refreshToken", refreshToken);
+      res.status(200).send(user);
+    } else {
+      next(
+        createHttpError(401, `Credentials did not match or user not found.`)
+      );
+    }
+  } catch (error) {
+    console.log("Error in log in");
+    next(error);
+  }
+});
+
+router.post("/user/refreshTokens", async (req, res, next) => {
+  try {
+    const currentRefreshToken = req.cookies.refreshToken;
+    const { accessToken, refreshToken, user } = await refreshTokens(
+      currentRefreshToken
+    );
+    res.cookie("accessToken", accessToken);
+    res.cookie("refreshToken", refreshToken);
+    res.status(201).send({ message: `${user.name}refreshed tokens` });
+  } catch (error) {
+    console.log("Refresh tokens", error);
+    next(error);
+  }
+});
 
 router.get("/user/all", JWTAuth, async (req, res, next) => {
   if (req.newTokens) {
@@ -205,54 +211,45 @@ router.get("/user/:userId", JWTAuth, async (req, res, next) => {
 
 //------------------------------------ chats ---------------------------
 
-router.post(
-  "/chat",
-  /* JWTAuth, */ async (req, res, next) => {
-    try {
-      const newChat = await chatModel(req.body);
-      const { _id } = await newChat.save();
-      console.log(newChat);
-      if (_id) {
-        res.status(201).send(_id);
-      } else {
-        next(createHttpError(404, `the chat did not create`));
-      }
-    } catch (error) {
-      next(error);
-    }
-  }
-);
-
-router.get(
-  "/chat/:chatId",
-  /* JWTAuth, */ async (req, res, next) => {
-    const chat = await chatModel.findById(req.params.chatId);
-    console.log("this is chat", chat);
-    if (chat) {
-      res.status(200).send(chat);
+router.post("/chat", JWTAuth, async (req, res, next) => {
+  try {
+    const newChat = await chatModel(req.body);
+    const { _id } = await newChat.save();
+    console.log(newChat);
+    if (_id) {
+      res.status(201).send(_id);
     } else {
-      next(createHttpError(404, `the chat you searching for, not found`));
+      next(createHttpError(404, `the chat did not create`));
     }
+  } catch (error) {
+    next(error);
   }
-);
+});
 
-router.get(
-  "/chat",
-  /* JWTAuth, */ async (req, res, next) => {
-    try {
-      const chats = await chatModel.find({ members: req.user._id });
-      if (chats) {
-        res.send(chats);
-      } else {
-        next(
-          createHttpError(404, `the chats you are searching for, do not found`)
-        );
-      }
-    } catch (error) {
-      next(error);
-    }
+router.get("/chat/:chatId", JWTAuth, async (req, res, next) => {
+  const chat = await chatModel.findById(req.params.chatId);
+  console.log("this is chat", chat);
+  if (chat) {
+    res.status(200).send(chat);
+  } else {
+    next(createHttpError(404, `the chat you searching for, not found`));
   }
-);
+});
+
+router.get("/chat", JWTAuth, async (req, res, next) => {
+  try {
+    const chats = await chatModel.find({ members: req.user._id });
+    if (chats) {
+      res.send(chats);
+    } else {
+      next(
+        createHttpError(404, `the chats you are searching for, do not found`)
+      );
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
 /* router.put("chat/:chatId", JWTAuth, async (req, res, next) => {
   const updatedChat = await chatModel.findByIdAndUpdate(

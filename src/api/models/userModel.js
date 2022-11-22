@@ -2,17 +2,15 @@ import { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
 
 const userDBSchema = new Schema(
-
   {
     password: { type: String },
     email: { type: String, required: true },
     username: { type: String, required: true },
-    avatar: { type: String },
+    avatar: { type: String, default: "" },
     refreshToken: { type: String },
   },
   { timestamps: true }
 );
-
 
 userDBSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
