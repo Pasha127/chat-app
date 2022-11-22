@@ -5,6 +5,8 @@ import bcrypt from "bcrypt"
 const userDBSchema = new Schema(
     {      
         password: { type: String},
+        name: {type: String},
+        avatar: {type:String},
         email: { type: String, required: true },
         refreshToken: { type: String }
 

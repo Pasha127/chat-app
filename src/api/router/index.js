@@ -17,14 +17,15 @@ const router = express.Router();
 router.post("/user/register", async (req, res, next) => {
     try {
         console.log(req.headers.origin, "POST user at:", new Date());        
+        const existingUser = await userModel.find(req.body.email);
+        if(existingUser){ next(createHttpError(400, `Email already in use`));}
         const newUser = new userModel(req.body);
-        const {email, role, rooms} = newUser;
         const{_id}= await newUser.save();
         if (_id) {
             const { accessToken, refreshToken } = await createTokens(newUser);
             res.cookie("accessToken", accessToken);
             res.cookie("refreshToken", refreshToken);
-            res.status(201).send({email, role, rooms, _id});
+            res.status(201).send(newUser);
           } else {
             console.log("Error in returned registration");
             next(createHttpError(500, `Registration error`));
@@ -44,9 +45,7 @@ router.put("/user/login", async (req, res, next) => {
         res.cookie("accessToken", accessToken);
         res.cookie("refreshToken", refreshToken);
         res.status(200).send(user);
-/*         res.redirect(`${process.env.FE_DEV_URL}/`) */
       } else {
-        res.redirect(`${process.env.FE_DEV_URL}/`)
         next(createHttpError(401, `Credentials did not match or user not found.`));
       }
     } catch (error) {
@@ -59,10 +58,10 @@ router.put("/user/login", async (req, res, next) => {
 router.post("/user/refreshTokens", async (req, res, next) => {
     try {
       const  currentRefreshToken  = req.cookies.refreshToken;
-      const { accessToken, refreshToken } = await refreshTokens(currentRefreshToken);
+      const { accessToken, refreshToken, user } = await refreshTokens(currentRefreshToken);
       res.cookie("accessToken", accessToken);
       res.cookie("refreshToken", refreshToken);
-      res.status(201).send({message: "refreshed tokens"});
+      res.status(201).send({message: `${user.name}refreshed tokens`});
     } catch (error) {
       console.log("Refresh tokens", error);
       next(error);

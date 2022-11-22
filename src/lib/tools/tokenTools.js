@@ -51,11 +51,12 @@ export const refreshTokens = async currentRefreshToken => {
   if(!currentRefreshToken){ throw new createHttpError(401, "Refresh token invalid!")}
   try {    
     const refreshTokenPayload = await verifyRefreshToken(currentRefreshToken);
+    if(!refreshTokenPayload)throw new createHttpError(401, "Refresh token invalid!");
     const user = await userModel.findById(refreshTokenPayload._id);
     if (!user) throw new createHttpError(404, `User with id ${refreshTokenPayload._id} not found!`);
     if (user.refreshToken && user.refreshToken === currentRefreshToken) {
       const { accessToken, refreshToken } = await createTokens(user)
-      return { accessToken, refreshToken }
+      return { accessToken, refreshToken, user }
     } else {
       throw new createHttpError(401, "Refresh token invalid!")
     }
