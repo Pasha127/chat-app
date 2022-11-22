@@ -21,8 +21,8 @@ router.post("/user/register", async (req, res, next) => {
   try {
     console.log(req.headers.origin, "POST user at:", new Date());
     const existingUser = await userModel.find({ email: req.body.email });
-    console.log(existingUser);
-    if (existingUser) {
+    console.log("this is existing user", existingUser);
+    if (existingUser.length > 0) {
       next(createHttpError(400, `Email already in use`));
     }
     const newUser = new userModel(req.body);
