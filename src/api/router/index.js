@@ -181,8 +181,8 @@ router.post(
     try {
       console.log(req.headers.origin, "POST user at:", new Date());
       const newUser = new userModel(req.body);
-      const { _id } = await newUser.save();
-      res.status(201).send({ message: `Added a new user.`, _id });
+      const createdUser= await newUser.save();
+      res.status(201).send(createdUser);
     } catch (error) {
       console.log("Post new user", error);
       next(error);
