@@ -13,4 +13,13 @@ const messageDBSchema = new Schema(
   }
 );
 
+messageDBSchema.methods.toJSON = function () {
+  const message = this.toObject();
+  
+  delete message.updatedAt;
+  delete message.__v;
+  return message;
+};
+
+
 export default model("Message", messageDBSchema);

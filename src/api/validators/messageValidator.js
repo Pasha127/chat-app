@@ -2,12 +2,12 @@ import { checkSchema, validationResult } from "express-validator"
 import createHttpError from "http-errors"
 
 const messageSchema = {
-  sender: {
+  /* sender: {
     in: ["body"],
     isString: {
       errorMessage: "Sender is a mandatory field and needs to be a string!",
     }
-  },
+  }, */
   "content.text": {
     in: ["body"],
     isString: {

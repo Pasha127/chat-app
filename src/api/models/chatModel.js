@@ -10,4 +10,14 @@ const chatDBSchema = new Schema(
   }
 );
 
+chatDBSchema.methods.toJSON = function () {
+  const chat = this.toObject();
+  
+  delete chat.createdAt;
+  delete chat.updatedAt;
+  delete chat.__v;
+  return chat;
+};
+
+
 export default model("Chat", chatDBSchema);

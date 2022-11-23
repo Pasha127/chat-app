@@ -234,24 +234,15 @@ router.post("/chat", JWTAuth, checkChatSchema, checkChatValidationResult, async 
     }
 });
 
-router.get("/chat/:chatId", JWTAuth, async (req, res, next) => {
-    const chat = await chatModel.findById(req.params.chatId);
-    console.log("this is chat", chat);
-    if (chat) {
-      res.status(200).send(chat);
-    } else {
-      next(createHttpError(404, `the chat you searching for, not found`));
-    }
-});
 
-router.get("/chat", JWTAuth, async (req, res, next) => {
-    try {
-      const chats = await chatModel.find({ members: req.user._id });
-      if (chats) {
-        res.send(chats);
-      } else {
-        next(
-          createHttpError(404, `the chats you are searching for, do not found`)
+router.get("/chat/me", JWTAuth, async (req, res, next) => {
+  try {
+    const chats = await chatModel.find({ members: req.user._id });
+    if (chats) {
+      res.send(chats);
+    } else {
+      next(
+        createHttpError(404, `the chats you are searching for, do not found`)
         );
       }
     } catch (error) {
@@ -267,47 +258,58 @@ router.get("/chat", JWTAuth, async (req, res, next) => {
       runValidators: true,
       new: true,
     }
-  );
-}); */
-
-/* router.delete("chat/:chatId", JWTAuth, async (req, res, next) => {
-  try {
-    const deletedChat = await chatModel.findByIdAndDelete(req.params.chatId);
-    if (deletedChat) {
-      res.status(204).send();
-    } else {
-      next(createHttpError(404, `the chat you searching for, not found`));
+    );
+  }); */
+  
+  router.get("/chat/:chatId", JWTAuth, async (req, res, next) => {
+      const chat = await chatModel.findById(req.params.chatId);
+      console.log("this is chat", chat);
+      if (chat) {
+        res.status(200).send(chat);
+      } else {
+        next(createHttpError(404, `the chat you searching for, not found`));
+      }
+  });
+  router.delete("/chat/:chatId", JWTAuth, async (req, res, next) => {
+    try {
+      const deletedChat = await chatModel.findByIdAndDelete(req.params.chatId);
+      if (deletedChat) {
+        res.status(204).send({message:`Deleted chat:${deletedChat._id}`});
+      } else {
+        next(createHttpError(404, `the chat you searching for, not found`));
+      }
+    } catch (error) {
+      console.log(error)
+      next(error);
     }
-  } catch (error) {
-    next(error);
-  }
-}); */
-
-// ------------------- message endpoints -----------------------------
-
-router.post("/message", JWTAuth, checkMessageSchema, checkMessageValidationResult, async (req, res, next) => {
-  try {
-    const newMessage = await MessageModel(req.body);
-    const { _id } = await newMessage.save();
-    if (_id) {
-      res.send(_id);
-    } else {
-      next(createHttpError(404, `message could not create`));
-    }
-  } catch (error) {
+  }); 
+  
+  // ------------------- message endpoints -----------------------------
+  
+  router.post("/message", JWTAuth, checkMessageSchema, checkMessageValidationResult, async (req, res, next) => {
+    try {
+      const newMessage = await MessageModel({...req.body, sender: req.user._id});
+      const { _id } = await newMessage.save();
+      if (_id) {
+        res.status(201).send(_id);
+      } else {
+        next(createHttpError(404, `Message could not be created`));
+      }
+    } catch (error) {
     next(error);
   }
 });
 
 router.get(
-  "/message",
-  /* JWTAuth, */ async (req, res, next) => {
+  "/message/me",
+  JWTAuth, async (req, res, next) => {
     try {
-      const messages = await MessageModel.find();
+      const messages = await MessageModel.find({sender:req.user._id});
+      console.log("found messages: ", messages )
       if (messages) {
-        res.status(200).send(messages);
+        res.status(200).send({messages});
       } else {
-        next(createHttpError(404, `messages do not found`));
+        next(createHttpError(404, `Messages not found`));
       }
     } catch (error) {
       next(error);
@@ -317,13 +319,14 @@ router.get(
 
 router.get(
   "/message/:messageId",
-  /* JWTAuth, */ async (req, res, next) => {
+  JWTAuth, async (req, res, next) => {
     try {
       const message = await MessageModel.findById(req.params.messageId);
+      console.log("found message: ", message )
       if (message) {
-        res.send(message);
+        res.status(200).send(message);
       } else {
-        next(createHttpError(404, `the message you searching for, not found`));
+        next(createHttpError(404, `Message not found`));
       }
     } catch (error) {
       next(error);
