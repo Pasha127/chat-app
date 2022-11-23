@@ -9,12 +9,13 @@ export const newConnectionHandler = (newClient) => {
     onlineUsers.push({ username: payload.username, socketId: newClient.id });
     newClient.emit("loggedIn", onlineUsers);
     newClient.broadcast.emit("listUpdate", onlineUsers);
+    console.log(onlineUsers);
   });
   newClient.on("sendMessage", async (message) => {
     //save message to db
     try {
       console.log("this is incoming message", message.content.text);
-      const msg = new MessageModel(message);
+      const msg =  new MessageModel(message);
       console.log("this is saved message", msg);
       await msg.save();
       newClient.emit("newMessage", message);
