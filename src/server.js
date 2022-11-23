@@ -13,7 +13,7 @@ import { newConnectionHandler } from "./socket/index.js";
 
 const server = express();
 const httpServer = createServer(server);
-const io = new SocketServer(httpServer);
+export const io = new SocketServer(httpServer);
 io.on("connection", newConnectionHandler);
 
 const port = process.env.PORT || 3001;
