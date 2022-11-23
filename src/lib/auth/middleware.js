@@ -9,16 +9,16 @@ export const JWTAuth = async (req, res, next) => {
       const currentAccessToken = req.cookies.accessToken
       const payload = await verifyAccessToken(currentAccessToken)
       if(payload.result !== "fail"){
-        console.log("passingToken")
+        /* console.log("passingToken") */
       req.user = {
         _id: payload._id,
         username: payload.username,
       }
       next()
       }else{
-        console.log("failedToken",req.cookies.refreshToken)
+        /* console.log("failedToken",req.cookies.refreshToken) */
         const  {accessToken, refreshToken, user} = await refreshTokens(req.cookies.refreshToken)
-        console.log("refreshed", refreshToken, user)
+        /* console.log("refreshed", refreshToken, user) */
       req.user = {
         _id: user._id,
         username: user.username,

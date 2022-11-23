@@ -45,7 +45,7 @@ router.post("/user/register", async (req, res, next) => {
     try {
         console.log(req.headers.origin, "POST user at:", new Date());        
         const existingUser = await userModel.find({ $or : [{email: req.body.email}, {username:req.body.username} ] });
-    console.log("this is existing user", existingUser);
+   /*  console.log("this is existing user", existingUser); */
     if (existingUser.length > 0) {
       next(createHttpError(400, `Email or username already in use`));
     }else{
@@ -118,15 +118,15 @@ router.get("/user/all", JWTAuth, async (req, res, next) => {
 
 router.put("/user/logout", JWTAuth, async (req, res, next) => {
   try {
-    console.log(req.headers.origin, "GET user at:", new Date());
+    console.log(req.headers.origin, "PUT user logout at:", new Date());
     /* console.log(req); */
-    const user = await userModel.find({ _id: req.user._id });
+    const user = await userModel.findOne({ _id: req.user._id });
     if (user) {
-      console.log("found user", user);
+      const userObj = user.toObject();
       res.clearCookie("refreshToken");
       res.clearCookie("accessToken");
       /*  res.redirect(`${process.env.FE_DEV_URL}/`) */
-      res.status(200).send({ message: `${user.toObject().username} logged out` });
+      res.status(200).send({ message: `${userObj.username} logged out` });
     } else {
       next(createHttpError(404, "User not found"));
     }
@@ -146,7 +146,7 @@ router.get("/user/me", JWTAuth, async (req, res, next) => {
     /* console.log(req); */
     const user = await userModel.find({ _id: req.user._id });
     if (user) {
-      console.log("found user", user);
+      /* console.log("found user", user); */
       res.status(200).send(user);
     } else {
       res.redirect(`${process.env.FE_DEV_URL}/`);
@@ -239,7 +239,7 @@ router.post("/chat", JWTAuth, checkChatSchema, checkChatValidationResult, async 
     try {
       const newChat = await chatModel(req.body);
       const { _id } = await newChat.save();
-      console.log(newChat);
+      console.log("newChat");
       if (_id) {
         res.status(201).send(_id);
       } else {
@@ -252,7 +252,7 @@ router.post("/chat", JWTAuth, checkChatSchema, checkChatValidationResult, async 
 
 router.get("/chat/me/history", JWTAuth, async (req, res, next) => {
   try {
-    const chats = await chatModel.find({ members: req.user._id }).populate('messages');
+    const chats = await chatModel.find({ members: req.user._id }).populate('messages').populate('members');
     if (chats) {
       res.send(chats);
     } else {
@@ -284,7 +284,7 @@ router.get("/chat/me", JWTAuth, async (req, res, next) => {
   
   router.get("/chat/:chatId", JWTAuth, async (req, res, next) => {
       const chat = await chatModel.findById(req.params.chatId);
-      console.log("this is chat", chat);
+      /* console.log("this is chat", chat); */
       if (chat) {
         res.status(200).send(chat);
       } else {
@@ -326,7 +326,7 @@ router.get(
   JWTAuth, async (req, res, next) => {
     try {
       const messages = await MessageModel.find({sender:req.user._id});
-      console.log("found messages: ", messages )
+      /* console.log("found messages: ", messages ) */
       if (messages) {
         res.status(200).send({messages});
       } else {
@@ -343,7 +343,7 @@ router.get(
   JWTAuth, async (req, res, next) => {
     try {
       const message = await MessageModel.findById(req.params.messageId);
-      console.log("found message: ", message )
+      /* console.log("found message: ", message ) */
       if (message) {
         res.status(200).send(message);
       } else {

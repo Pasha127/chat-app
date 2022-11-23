@@ -14,7 +14,7 @@ const googleStrategy = new GoogleStrategy(
 
     try {
       const { email, sub, picture } = profile._json;
-      console.log("google data", email, sub, picture);
+     /*  console.log("google data", email, sub, picture); */
       const user = await userModel.findOne({ email });
       if (user) {
         const tokens = await createTokens(user);

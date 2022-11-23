@@ -22,7 +22,7 @@ export const newConnectionHandler = (newClient) => {
 
     console.log("this is incoming message", socket.content);
     const msg = new MessageModel(socket.message);
-    console.log("this is saved message", msg);
+    //console.log("this is saved message", msg);
     const newMsg = await msg.save();
 
     const commonChat = await chatModel.find({
@@ -32,13 +32,13 @@ export const newConnectionHandler = (newClient) => {
       commonChat[0].messages.push(newMsg._id);
 
       await commonChat[0].save();
-      console.log(commonChat);
-      console.log("has chat");
+      //console.log(commonChat);
+      //console.log("has chat");
       const chatId = commonChat._id;
       newClient.join(chatId);
       io.to(chatId).emit("testmessage", socket.message.content);
     } else {
-      console.log("no chat");
+      //console.log("no chat");
       const newChat = new chatModel({
         members: socket.members,
         messages: [newMsg._id],
