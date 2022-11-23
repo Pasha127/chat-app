@@ -18,12 +18,28 @@ import {
 import userModel from "../models/userModel.js";
 import chatModel from "../models/chatModel.js";
 import MessageModel from "../models/MessageModel.js";
+import passport from "passport";
 
 const localEndpoint = process.env.BE_PROD_URL;
 
 const router = express.Router();
 
 ////////////////////////////  USERS  ////////////////////////////
+
+ router.get("/user/googleLogin", passport.authenticate("google",{scope:["email","profile"]})) 
+
+router.get("/user/googleRedirect", passport.authenticate("google",{session: false}), async (req, res, next) => {
+
+  try {
+    const {accessToken,refreshToken} = req.user
+    res.cookie("accessToken",accessToken,{"httpOnly":true});
+    res.cookie("refreshToken",refreshToken,{"httpOnly":true});
+    res.redirect(`${process.env.FE_DEV_URL}/`/* ?loginSuccessful=true */ );
+  }catch(error){
+    console.log(error)
+      next(error);
+  }   
+}) 
 
 router.post("/user/register", async (req, res, next) => {
     try {
