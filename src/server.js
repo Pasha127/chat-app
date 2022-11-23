@@ -17,10 +17,11 @@ const io = new SocketServer(httpServer);
 io.on("connection", newConnectionHandler);
 
 const port = process.env.PORT || 3001;
-const whitelist = [process.env.FE_DEV_URL];
-/* passport.use("google", googleStrategy) */
 passport.use("google", googleStrategy)
-server.use(cors(whitelist));
+server.use(cors({
+    origin:process.env.FE_DEV_URL,
+    credentials:true
+}));
 server.use(cookieParser());
 server.use(express.json());
 server.use(passport.initialize());
