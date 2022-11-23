@@ -48,39 +48,7 @@ export const newConnectionHandler = (newClient) => {
       io.to(_id).emit("testmessage", socket.message.content);
     }
   });
-
-  /* io.on("startChat", (socket) => {
-    console.log("this is chat content: ", chat);
-    /*  const id = await chatModel.find({ members: [...chat.members] });
-    socket.join(`chatroom`);
-    newClient.emit("receive", { message: "this is content message" });
-    io.to("chatroom").emit("hi");
-  }); */
-
-  /* newClient.on("sendMessage", async (chat) => {
-   
-
-    try {
-      /* const commonChat = await chatModel.find({ members: chat.members });
-      //check if the send and receiver have a common chat
-      if (commonChat) {
-        //update the already existing chat with the new message
-        console.log("the members already exist");
-      } else {
-        //create a new chat for the 2 users and update it with the message
-        const newChat = new chatModel({
-          members: chat.members,
-          messages: chat.messages,
-        });
-        newChat.save();
-      } 
-
-      newClient.emit("newMessage", chat.message);
-      newClient.broadcast.emit("newMessage", chat.message);
-    } catch (error) {
-      console.log(error);
-    }
-  }); */
+ 
   newClient.on("disconnect", () => {
     onlineUsers = onlineUsers.filter((user) => user.socketId !== newClient.id);
     newClient.broadcast.emit("listUpdate", onlineUsers);

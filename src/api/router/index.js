@@ -250,6 +250,20 @@ router.post("/chat", JWTAuth, checkChatSchema, checkChatValidationResult, async 
     }
 });
 
+router.get("/chat/me/history", JWTAuth, async (req, res, next) => {
+  try {
+    const chats = await chatModel.find({ members: req.user._id }).populate('messages');
+    if (chats) {
+      res.send(chats);
+    } else {
+      next(
+        createHttpError(404, `the chats you are searching for, do not found`)
+        );
+      }
+    } catch (error) {
+      next(error);
+    }
+});
 
 router.get("/chat/me", JWTAuth, async (req, res, next) => {
   try {
@@ -266,16 +280,7 @@ router.get("/chat/me", JWTAuth, async (req, res, next) => {
     }
 });
 
-/* router.put("chat/:chatId", JWTAuth, async (req, res, next) => {
-  const updatedChat = await chatModel.findByIdAndUpdate(
-    req.params.chatId,
-    { ...req.body },
-    {
-      runValidators: true,
-      new: true,
-    }
-    );
-  }); */
+
   
   router.get("/chat/:chatId", JWTAuth, async (req, res, next) => {
       const chat = await chatModel.findById(req.params.chatId);
