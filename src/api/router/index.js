@@ -7,6 +7,14 @@ import {
   checkUserSchema,
   checkValidationResult as checkUserValidationResult,
 } from "../validators/userValidator.js";
+import {
+  checkMessageSchema,
+  checkValidationResult as checkMessageValidationResult,
+} from "../validators/messageValidator.js";
+import {
+  checkChatSchema,
+  checkValidationResult as checkChatValidationResult,
+} from "../validators/chatValidator.js";
 import userModel from "../models/userModel.js";
 import chatModel from "../models/chatModel.js";
 import MessageModel from "../models/MessageModel.js";
@@ -211,7 +219,7 @@ router.get("/user/:userId", JWTAuth, async (req, res, next) => {
 
 //------------------------------------ chats ---------------------------
 
-router.post("/chat", JWTAuth, async (req, res, next) => {
+router.post("/chat", JWTAuth, checkChatSchema, checkChatValidationResult, async (req, res, next) => {
     try {
       const newChat = await chatModel(req.body);
       const { _id } = await newChat.save();
@@ -277,7 +285,7 @@ router.get("/chat", JWTAuth, async (req, res, next) => {
 
 // ------------------- message endpoints -----------------------------
 
-router.post("/message", async (req, res, next) => {
+router.post("/message", JWTAuth, checkMessageSchema, checkMessageValidationResult, async (req, res, next) => {
   try {
     const newMessage = await MessageModel(req.body);
     const { _id } = await newMessage.save();
