@@ -5,15 +5,16 @@ import userModel from "../api/models/userModel.js";
 import { io } from "../server.js";
 /* const socket = io(process.env.FE_DEV_URL); */
 
-let onlineUsers = [];
+export let onlineUsers = [];
 export const newConnectionHandler = (newClient) => {
   newClient.emit("welcome", {
     message: `Connection established on pipeline: ${newClient.id}`,
   });
   newClient.on("setUsername", (payload) => {
+    console.log(payload)
     onlineUsers.push({ username: payload.username, socketId: newClient.id });
-    newClient.emit("loggedIn", onlineUsers);
-    newClient.broadcast.emit("listUpdate", onlineUsers);
+    /* newClient.emit("loggedIn", onlineUsers); */
+   io.emit("listUpdate", onlineUsers);
     console.log(onlineUsers);
   });
 
