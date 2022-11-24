@@ -19,12 +19,27 @@ import userModel from "../models/userModel.js";
 import chatModel from "../models/chatModel.js";
 import MessageModel from "../models/MessageModel.js";
 import passport from "passport";
+import multer from "multer"; 
+import { v2 as cloudinary } from "cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 
 const localEndpoint = process.env.BE_PROD_URL;
 
 const router = express.Router();
 
+
+const cloudinaryUploader = multer({
+  storage: new CloudinaryStorage({
+    cloudinary, 
+    params: {folder: "ChatAvatars"},
+  }),
+  limits: { fileSize: 1024 * 1024 },
+}).single("image")
+
+
 ////////////////////////////  USERS  ////////////////////////////
+
+
 
  router.get("/user/googleLogin", passport.authenticate("google",{scope:["email","profile"]})) 
 
@@ -62,6 +77,16 @@ router.post("/user/register", async (req, res, next) => {
         }}
   } catch (error) {
         console.log("Error in registration", error);
+        next(error);
+    }   
+});
+
+router.post("/user/avatar", JWTAuth, cloudinaryUploader, async (req, res, next) => {
+    try {
+        console.log(req.headers.origin, "POST user at:", new Date());        
+        const updatedUser = await userModel.findByIdAndUpdate(req.user._id,{avatar:req.file.path});
+  } catch (error) {
+        console.log("Error in avatar upload", error);
         next(error);
     }   
 });
