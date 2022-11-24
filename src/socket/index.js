@@ -2,7 +2,7 @@ import { Socket } from "socket.io";
 import chatModel from "../api/models/chatModel.js";
 import MessageModel from "../api/models/MessageModel.js";
 import userModel from "../api/models/userModel.js";
-import { io } from "../server.js";
+import  {io}  from "../server.js";
 /* const socket = io(process.env.FE_DEV_URL); */
 
 export let onlineUsers = [];
@@ -11,9 +11,10 @@ export const newConnectionHandler = (newClient) => {
     message: `Connection established on pipeline: ${newClient.id}`,
   });
   newClient.on("setUsername", (payload) => {
+    console.log(payload)
     onlineUsers.push({ username: payload.username, socketId: newClient.id });
-    newClient.emit("loggedIn", onlineUsers);
-    newClient.broadcast.emit("listUpdate", onlineUsers);
+    /* newClient.emit("loggedIn", onlineUsers); */
+   io.emit("listUpdate", onlineUsers);
     console.log(onlineUsers);
   });
 
@@ -54,3 +55,4 @@ export const newConnectionHandler = (newClient) => {
     newClient.broadcast.emit("listUpdate", onlineUsers);
   });
 };
+

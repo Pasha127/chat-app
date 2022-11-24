@@ -9,22 +9,20 @@ import passport from "passport";
 import cookieParser from "cookie-parser";
 import { Server as SocketServer } from "socket.io";
 import { createServer } from "http";
-import { socketAuthMiddleware } from "./lib/auth/socketAuth.js";
+import { newConnectionHandler } from "./socket/index.js";
 
 const server = express();
 const httpServer = createServer(server);
 export const io = new SocketServer(httpServer);
 
-io.use(socketAuthMiddleware);
+io.on('connection', newConnectionHandler)
 
 const port = process.env.PORT || 3001;
-passport.use("google", googleStrategy);
-server.use(
-  cors({
-    origin: process.env.FE_DEV_URL,
-    credentials: true,
-  })
-);
+passport.use("google", googleStrategy)
+server.use(cors({
+    origin:process.env.FE_DEV_URL,
+    credentials:true
+}));
 server.use(cookieParser());
 server.use(express.json());
 server.use(passport.initialize());
