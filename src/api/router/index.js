@@ -308,14 +308,20 @@ router.get("/chat/me", JWTAuth, async (req, res, next) => {
 
   
   router.get("/chat/:chatId", JWTAuth, async (req, res, next) => {
-      const chat = await chatModel.findById(req.params.chatId);
-      /* console.log("this is chat", chat); */
+    try{
+      const chat = await chatModel.findById(req.params.chatId).populate('messages').populate('members');
+      console.log("this is chat", chat);
       if (chat) {
         res.status(200).send(chat);
       } else {
         next(createHttpError(404, `the chat you searching for, not found`));
       }
+    }catch(error){
+      console.log(error)
+      next(error)
+    }
   });
+  
   router.delete("/chat/:chatId", JWTAuth, async (req, res, next) => {
     try {
       const deletedChat = await chatModel.findByIdAndDelete(req.params.chatId);
