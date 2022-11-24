@@ -2,8 +2,6 @@
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary"; */
 
-/* import passport from "passport"; */
-
 /* const cloudinaryUploader = multer({
   storage: new CloudinaryStorage({
     cloudinary, 
@@ -18,20 +16,6 @@ import { CloudinaryStorage } from "multer-storage-cloudinary"; */
 
 
 
-/* router.get("/googleLogin", passport.authenticate("google",{scope:["email","profile"]})) */
-
-/* router.get("/googleRedirect", passport.authenticate("google",{session: false}), async (req, res, next) => {
-
-  try {
-    const {accessToken,refreshToken} = req.user
-    res.cookie("accessToken",accessToken,{"httpOnly":true});
-    res.cookie("refreshToken",refreshToken,{"httpOnly":true});
-    res.redirect(`${process.env.FE_DEV_URL}/`/* ?loginSuccessful=true *//* );
-  }catch(error){
-    console.log(error)
-      next(error);
-  }   
-}) */
 
 /* router.get("/facebookLogin", passport.authenticate('facebook')) */
 
