@@ -31,7 +31,9 @@ export const newConnectionHandler = (newClient) => {
       await commonChat[0].save();
       //console.log(commonChat);
       console.log(socket.message.message.content.text);
-      const chatId = commonChat._id;
+      const chatId = commonChat[0]._id.toString();
+      console.log("chatId: ",chatId);
+      console.log(commonChat);
       newClient.join(chatId);
       io.to(chatId).emit("newMessage", socket.message.message.content.text);
     } else {
