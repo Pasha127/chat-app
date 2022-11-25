@@ -11,21 +11,24 @@ import  {io}  from "../server.js";
 export let onlineUsers = [];
 export const newConnectionHandler = (newClient) => {
   newClient.on("setUsername", (payload) => {
+    console.log("setusername");
     newClient.emit("welcome", {
       message: `Connection established on pipeline: ${newClient.id}`,
     });
     console.log(payload)
     onlineUsers.push({_id:payload._id, username: payload.username, socketId: newClient.id, socket:newClient });
-   io.emit("listUpdate", onlineUsers);
+    io.emit("listUpdate", onlineUsers);
     console.log(onlineUsers);
   });
-
+  
   newClient.on("joinRoom", async(socket)=>{
+    console.log("joinRoom");
     /* let reciver =  onlineUsers.find(user => user._id === socket.target._id) */
-    newClient.join(socket.chatRoom);
+    newClient.join(socket.chatRoomId); 
   })
-
+  
   newClient.on("sendMessage", async (socket) => {
+    console.log("sendMsg");
     console.log("this is incoming message", socket.message.message);
     const msg = new MessageModel(socket.message.message);
     console.log("this is saved message", msg);
@@ -33,9 +36,9 @@ export const newConnectionHandler = (newClient) => {
     const commonChat = await chatModel.find({
       members: socket.message.members
     });
- if (commonChat.length === 1) {
+    if (commonChat.length === 1) {
       commonChat[0].messages.push(newMsg._id);
-
+      
       await commonChat[0].save();
       //console.log(commonChat);
       console.log(socket.message.message.content.text);
@@ -55,8 +58,9 @@ export const newConnectionHandler = (newClient) => {
       io.to(_id).emit("newMessage", socket.message.message.content.text);
     }
   });
- 
+  
   newClient.on("disconnect", () => {
+    console.log("disconnect");
     onlineUsers = onlineUsers.filter((user) => user.socketId !== newClient.id);
     newClient.broadcast.emit("listUpdate", onlineUsers);
   });
