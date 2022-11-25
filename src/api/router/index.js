@@ -310,7 +310,7 @@ router.get("/chat/me", JWTAuth, async (req, res, next) => {
   router.get("/chat/:chatId", JWTAuth, async (req, res, next) => {
     try{
       const chat = await chatModel.findById(req.params.chatId).populate('messages').populate('members');
-      console.log("this is chat", chat);
+      /* console.log("this is chat", chat); */
       if (chat) {
         res.status(200).send(chat);
       } else {

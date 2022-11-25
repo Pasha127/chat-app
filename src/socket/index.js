@@ -7,13 +7,12 @@ import  {io}  from "../server.js";
 
 export let onlineUsers = [];
 export const newConnectionHandler = (newClient) => {
-  newClient.emit("welcome", {
-    message: `Connection established on pipeline: ${newClient.id}`,
-  });
   newClient.on("setUsername", (payload) => {
+    newClient.emit("welcome", {
+      message: `Connection established on pipeline: ${newClient.id}`,
+    });
     console.log(payload)
     onlineUsers.push({ username: payload.username, socketId: newClient.id });
-    /* newClient.emit("loggedIn", onlineUsers); */
    io.emit("listUpdate", onlineUsers);
     console.log(onlineUsers);
   });

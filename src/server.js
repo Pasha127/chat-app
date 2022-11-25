@@ -10,11 +10,23 @@ import cookieParser from "cookie-parser";
 import { Server as SocketServer } from "socket.io";
 import { createServer } from "http";
 import { newConnectionHandler } from "./socket/index.js";
+import { verifyAccessToken } from "./lib/tools/tokenTools.js";
+
 
 const server = express();
 const httpServer = createServer(server);
 export const io = new SocketServer(httpServer);
-
+io.use( async(socket, next) => {
+  const token = socket.handshake.headers.cookie?.split(";")[0].replace("accessToken=", "");
+  /* console.log("accesstoken: ",token); */
+ const isAllowed = await verifyAccessToken(token)
+  if (isAllowed._id) {
+    console.log("is",isAllowed._id)
+    next();
+  } else {
+    console.log('auth failed')
+  }
+})
 io.on('connection', newConnectionHandler)
 
 const port = process.env.PORT || 3001;
