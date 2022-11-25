@@ -5,6 +5,9 @@ import userModel from "../api/models/userModel.js";
 import  {io}  from "../server.js";
 /* const socket = io(process.env.FE_DEV_URL); */
 
+
+
+
 export let onlineUsers = [];
 export const newConnectionHandler = (newClient) => {
   newClient.on("setUsername", (payload) => {
@@ -12,10 +15,15 @@ export const newConnectionHandler = (newClient) => {
       message: `Connection established on pipeline: ${newClient.id}`,
     });
     console.log(payload)
-    onlineUsers.push({ username: payload.username, socketId: newClient.id });
+    onlineUsers.push({_id:payload._id, username: payload.username, socketId: newClient.id, socket:newClient });
    io.emit("listUpdate", onlineUsers);
     console.log(onlineUsers);
   });
+
+  newClient.on("joinRoom", async(socket)=>{
+    /* let reciver =  onlineUsers.find(user => user._id === socket.target._id) */
+    newClient.join(socket.chatRoom);
+  })
 
   newClient.on("sendMessage", async (socket) => {
     console.log("this is incoming message", socket.message.message);
