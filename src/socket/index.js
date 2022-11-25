@@ -18,25 +18,22 @@ export const newConnectionHandler = (newClient) => {
   });
 
   newClient.on("sendMessage", async (socket) => {
-    /* const id = await chatModel.find({ members: [...chat.members] }); */
-
-    console.log("this is incoming message", socket.content);
-    const msg = new MessageModel(socket.message);
-    //console.log("this is saved message", msg);
+    console.log("this is incoming message", socket.message.message);
+    const msg = new MessageModel(socket.message.message);
+    console.log("this is saved message", msg);
     const newMsg = await msg.save();
-
     const commonChat = await chatModel.find({
-      members: { $all: [...socket.members] },
+      members: socket.message.members
     });
-    if (commonChat.length === 1) {
+ if (commonChat.length === 1) {
       commonChat[0].messages.push(newMsg._id);
 
       await commonChat[0].save();
       //console.log(commonChat);
-      //console.log("has chat");
+      console.log(socket.message.message.content.text);
       const chatId = commonChat._id;
       newClient.join(chatId);
-      io.to(chatId).emit("testmessage", socket.message.content);
+      io.to(chatId).emit("newMessage", socket.message.message.content.text);
     } else {
       //console.log("no chat");
       const newChat = new chatModel({
@@ -45,7 +42,7 @@ export const newConnectionHandler = (newClient) => {
       });
       const { _id } = await newChat.save();
       newClient.join(_id);
-      io.to(_id).emit("testmessage", socket.message.content);
+      io.to(_id).emit("newMessage", socket.message.message.content.text);
     }
   });
  

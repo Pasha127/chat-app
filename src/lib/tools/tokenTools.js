@@ -15,7 +15,7 @@ export const createTokens = async user => {
 
 const createAccessToken = payload =>
   new Promise(function (res, rej) {
-    jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "5m" }, (err, token) => {
+    jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "5h" }, (err, token) => {
       if (err) rej(err);
       else res(token);
     })
