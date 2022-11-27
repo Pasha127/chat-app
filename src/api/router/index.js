@@ -170,13 +170,13 @@ router.get("/user/me", JWTAuth, async (req, res, next) => {
     console.log(req.headers.origin, "GET me at:", new Date());
     /* console.log(req); */
     const user = await userModel.find({ _id: req.user._id });
-    if (user) {
+     if (user) {
       /* console.log("found user", user); */
       res.status(200).send(user);
-    } else {
-      res.redirect(`${process.env.FE_DEV_URL}/`);
-      next(createHttpError(404, "User not found"));
-    }
+     } else {
+
+       next(createHttpError(404, "User not found"));
+     }
   } catch (error) {
     console.log("error get me");
     next(error);
