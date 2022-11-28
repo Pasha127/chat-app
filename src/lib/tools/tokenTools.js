@@ -4,7 +4,7 @@ import userModel from "../../api/models/userModel.js";
 
 
 export const createTokens = async user => {
-  const accessToken = await createAccessToken({ _id: user._id, role: user.role });
+  const accessToken = await createAccessToken({ _id: user._id, username: user.username });
   const refreshToken = await createRefreshToken({ _id: user._id });
  
   user.refreshToken = refreshToken;
@@ -15,7 +15,7 @@ export const createTokens = async user => {
 
 const createAccessToken = payload =>
   new Promise(function (res, rej) {
-    jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "5m" }, (err, token) => {
+    jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "5h" }, (err, token) => {
       if (err) rej(err);
       else res(token);
     })
@@ -51,11 +51,12 @@ export const refreshTokens = async currentRefreshToken => {
   if(!currentRefreshToken){ throw new createHttpError(401, "Refresh token invalid!")}
   try {    
     const refreshTokenPayload = await verifyRefreshToken(currentRefreshToken);
+    if(!refreshTokenPayload)throw new createHttpError(401, "Refresh token invalid!");
     const user = await userModel.findById(refreshTokenPayload._id);
     if (!user) throw new createHttpError(404, `User with id ${refreshTokenPayload._id} not found!`);
     if (user.refreshToken && user.refreshToken === currentRefreshToken) {
       const { accessToken, refreshToken } = await createTokens(user)
-      return { accessToken, refreshToken }
+      return { accessToken, refreshToken, user:user.toObject() }
     } else {
       throw new createHttpError(401, "Refresh token invalid!")
     }
