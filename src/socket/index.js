@@ -23,11 +23,11 @@ export const newConnectionHandler = (newClient) => {
     io.emit("listUpdate", onlineUsers);
   });
   
-/*   newClient.on("joinRoom", async(socket)=>{
-    console.log("joinRoom");
+ newClient.on("joinRoom", async(socket)=>{
+    console.log("joinRoom :", socket.chatRoomId);
     newClient.join(socket.chatRoomId); 
     joinedRoom = socket.chatRoomId;
-  }) */
+  }) 
   
   newClient.on("sendMessage", async (socket) => {
     console.log("sendMsg");
@@ -42,11 +42,10 @@ export const newConnectionHandler = (newClient) => {
       commonChat[0].messages.push(newMsg._id);
       
       await commonChat[0].save();
-      //console.log(commonChat);
-      console.log(socket.message.message.content.text);
+     
+      console.log("msg txt: ",socket.message.message.content.text);
       const chatId = commonChat[0]._id.toString();
       console.log("chatId: ",chatId);
-      console.log(commonChat);
       newClient.join(chatId);
       io.to(chatId).emit("newMessage", socket.message.message);
     } else {
@@ -57,7 +56,7 @@ export const newConnectionHandler = (newClient) => {
       });
       const { _id } = await newChat.save();
       newClient.join(_id);
-      io.to(_id).emit("newMessage", socket.message.message.content.text);
+      io.to(_id).emit("newMessage", socket.message.message);
     }
   });
   
