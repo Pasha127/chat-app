@@ -64,7 +64,8 @@ router.post("/user/register", async (req, res, next) => {
     if (existingUser.length > 0) {
       next(createHttpError(400, `Email or username already in use`));
     }else{
-        const newUser = new userModel(req.body);
+
+        const newUser = new userModel({...req.body, email:req.body.email.toLowerCase()});
     const { _id } = await newUser.save();
         if (_id) {
             const { accessToken, refreshToken } = await createTokens(newUser);
@@ -179,6 +180,26 @@ router.get("/user/me", JWTAuth, async (req, res, next) => {
      }
   } catch (error) {
     console.log("error get me");
+    next(error);
+  }
+});
+
+router.get("/user/email/:emailValue", JWTAuth, async (req, res, next) => {
+  if (req.newTokens) {
+    res.cookie("accessToken", req.newTokens.newAccessToken, {httpOnly:true});
+    res.cookie("refreshToken", req.newTokens.newRefreshToken, {httpOnly:true});
+  }
+  try {
+    console.log(req.headers.origin, "GET by email at:", new Date());
+    const user = await userModel.findOne({ email: req.params.emailValue.toLowerCase()});
+     if (user) {
+      /* console.log("found user", user); */
+      res.status(200).send(user);
+     } else {
+       next(createHttpError(404, "User not found"));
+     }
+  } catch (error) {
+    console.log("error getting by email");
     next(error);
   }
 });

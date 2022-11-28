@@ -21,7 +21,7 @@ const googleStrategy = new GoogleStrategy(
         passportNext(null, tokens);
       } else {
         const newUser = new userModel({
-          email,
+          email: email.toLowerCase(),
           username: sub,
           avatar: picture,
         });
