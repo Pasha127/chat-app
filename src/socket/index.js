@@ -60,6 +60,12 @@ export const newConnectionHandler = (newClient) => {
     }
   });
   
+  newClient.on("logOut", () => {
+    console.log("disconnect - logout");
+    onlineUsers = onlineUsers.filter((user) => user.socketId !== newClient.id);
+    io.emit("listUpdate", onlineUsers);
+  });
+  
   newClient.on("disconnect", () => {
     console.log("disconnect");
     onlineUsers = onlineUsers.filter((user) => user.socketId !== newClient.id);
