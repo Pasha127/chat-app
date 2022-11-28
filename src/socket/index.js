@@ -23,12 +23,11 @@ export const newConnectionHandler = (newClient) => {
     io.emit("listUpdate", onlineUsers);
   });
   
-  newClient.on("joinRoom", async(socket)=>{
+/*   newClient.on("joinRoom", async(socket)=>{
     console.log("joinRoom");
-    /* let reciver =  onlineUsers.find(user => user._id === socket.target._id) */
     newClient.join(socket.chatRoomId); 
     joinedRoom = socket.chatRoomId;
-  })
+  }) */
   
   newClient.on("sendMessage", async (socket) => {
     console.log("sendMsg");
@@ -49,7 +48,7 @@ export const newConnectionHandler = (newClient) => {
       console.log("chatId: ",chatId);
       console.log(commonChat);
       newClient.join(chatId);
-      io.to(joinedRoom).emit("newMessage", socket.message.message);
+      io.to(chatId).emit("newMessage", socket.message.message);
     } else {
       //console.log("no chat");
       const newChat = new chatModel({
@@ -58,7 +57,7 @@ export const newConnectionHandler = (newClient) => {
       });
       const { _id } = await newChat.save();
       newClient.join(_id);
-      io.to(joinedRoom).emit("newMessage", socket.message.message.content.text);
+      io.to(_id).emit("newMessage", socket.message.message.content.text);
     }
   });
   
