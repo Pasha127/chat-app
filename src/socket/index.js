@@ -49,12 +49,14 @@ export const newConnectionHandler = (newClient) => {
       newClient.join(chatId);
       io.to(chatId).emit("newMessage", socket.message.message);
     } else {
-      //console.log("no chat");
+      console.log("no chat");
       const newChat = new chatModel({
-        members: socket.members,
+        members: socket.message.members,
         messages: [newMsg._id],
       });
+      console.log("new chat", newChat);
       const { _id } = await newChat.save();
+      console.log("chat_id", _id);
       newClient.join(_id);
       io.to(_id).emit("newMessage", socket.message.message);
     }
